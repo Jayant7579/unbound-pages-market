@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +11,7 @@ interface Book {
   cover: string;
   category: string;
   preview: string;
+  price: number;
 }
 
 interface BookReaderProps {

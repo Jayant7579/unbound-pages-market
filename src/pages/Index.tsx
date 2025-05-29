@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Search, ShoppingCart, Star, Users, TrendingUp, Heart } from "lucide-react";
+import { BookOpen, Search, ShoppingCart, Star, Users, TrendingUp, Heart, LogIn } from "lucide-react";
 import BookReader from "@/components/BookReader";
 import SellBookForm from "@/components/SellBookForm";
+import CartPage from "@/components/CartPage";
+import AuthPage from "@/components/AuthPage";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState("home");
@@ -75,6 +77,31 @@ const Index = () => {
     setCart([...cart, book]);
   };
 
+  const removeFromCart = (bookId) => {
+    setCart(cart.filter(book => book.id !== bookId));
+  };
+
+  const updateCartQuantity = (bookId, quantity) => {
+    // For now, just update by adding/removing items
+    const currentCount = cart.filter(book => book.id === bookId).length;
+    const difference = quantity - currentCount;
+    
+    if (difference > 0) {
+      const bookToAdd = featuredBooks.find(book => book.id === bookId);
+      const newItems = Array(difference).fill(bookToAdd);
+      setCart([...cart, ...newItems]);
+    } else if (difference < 0) {
+      let updatedCart = [...cart];
+      for (let i = 0; i < Math.abs(difference); i++) {
+        const index = updatedCart.findIndex(book => book.id === bookId);
+        if (index > -1) {
+          updatedCart.splice(index, 1);
+        }
+      }
+      setCart(updatedCart);
+    }
+  };
+
   const readBook = (book) => {
     setSelectedBook(book);
     setCurrentView("reader");
@@ -86,6 +113,21 @@ const Index = () => {
 
   if (currentView === "sell") {
     return <SellBookForm onBack={() => setCurrentView("home")} />;
+  }
+
+  if (currentView === "cart") {
+    return (
+      <CartPage 
+        cart={cart} 
+        onBack={() => setCurrentView("home")}
+        onRemoveFromCart={removeFromCart}
+        onUpdateQuantity={updateCartQuantity}
+      />
+    );
+  }
+
+  if (currentView === "auth") {
+    return <AuthPage onBack={() => setCurrentView("home")} />;
   }
 
   return (
@@ -116,9 +158,21 @@ const Index = () => {
               >
                 Sell Books
               </Button>
-              <Button variant="outline" className="relative">
+              <Button 
+                variant="outline" 
+                onClick={() => setCurrentView("cart")}
+                className="relative"
+              >
                 <ShoppingCart className="h-4 w-4 mr-2" />
                 Cart ({cart.length})
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setCurrentView("auth")}
+                className="text-gray-700 hover:text-purple-600"
+              >
+                <LogIn className="h-4 w-4 mr-2" />
+                Login
               </Button>
             </nav>
           </div>
