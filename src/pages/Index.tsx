@@ -9,12 +9,14 @@ import SellBookForm from "@/components/SellBookForm";
 import CartPage from "@/components/CartPage";
 import AuthPage from "@/components/AuthPage";
 import AdminPage from "@/components/AdminPage";
+import AdminLogin from "@/components/AdminLogin";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState("home");
   const [selectedBook, setSelectedBook] = useState(null);
   const [cart, setCart] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
 
   const [featuredBooks, setFeaturedBooks] = useState([
     {
@@ -107,25 +109,22 @@ const Index = () => {
     setCurrentView("reader");
   };
 
-  // Admin functions
-  const addBook = (bookData) => {
-    const newBook = {
-      ...bookData,
-      id: Math.max(...featuredBooks.map(b => b.id)) + 1
-    };
-    setFeaturedBooks([...featuredBooks, newBook]);
+  const handleAdminClick = () => {
+    if (isAdminLoggedIn) {
+      setCurrentView("admin");
+    } else {
+      setCurrentView("adminLogin");
+    }
   };
 
-  const updateBook = (bookId, bookData) => {
-    setFeaturedBooks(featuredBooks.map(book => 
-      book.id === bookId ? { ...book, ...bookData } : book
-    ));
+  const handleAdminLogin = () => {
+    setIsAdminLoggedIn(true);
+    setCurrentView("admin");
   };
 
-  const deleteBook = (bookId) => {
-    setFeaturedBooks(featuredBooks.filter(book => book.id !== bookId));
-    // Also remove from cart if present
-    setCart(cart.filter(book => book.id !== bookId));
+  const handleAdminLogout = () => {
+    setIsAdminLoggedIn(false);
+    setCurrentView("home");
   };
 
   if (currentView === "reader" && selectedBook) {
@@ -151,7 +150,11 @@ const Index = () => {
     return <AuthPage onBack={() => setCurrentView("home")} />;
   }
 
-  if (currentView === "admin") {
+  if (currentView === "adminLogin") {
+    return <AdminLogin onBack={() => setCurrentView("home")} onLogin={handleAdminLogin} />;
+  }
+
+  if (currentView === "admin" && isAdminLoggedIn) {
     return (
       <AdminPage 
         onBack={() => setCurrentView("home")}
@@ -209,7 +212,7 @@ const Index = () => {
               </Button>
               <Button 
                 variant="outline" 
-                onClick={() => setCurrentView("admin")}
+                onClick={handleAdminClick}
                 className="text-gray-700 hover:text-purple-600 border-orange-200 hover:bg-orange-50"
               >
                 <Shield className="h-4 w-4 mr-2" />
