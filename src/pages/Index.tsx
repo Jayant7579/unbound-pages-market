@@ -127,6 +127,25 @@ const Index = () => {
     setCurrentView("home");
   };
 
+  // Admin book management functions
+  const addBook = (newBook) => {
+    const maxId = Math.max(...featuredBooks.map(book => book.id), 0);
+    const bookWithId = { ...newBook, id: maxId + 1 };
+    setFeaturedBooks([...featuredBooks, bookWithId]);
+  };
+
+  const updateBook = (bookId, updatedBook) => {
+    setFeaturedBooks(featuredBooks.map(book => 
+      book.id === bookId ? { ...book, ...updatedBook } : book
+    ));
+  };
+
+  const deleteBook = (bookId) => {
+    setFeaturedBooks(featuredBooks.filter(book => book.id !== bookId));
+    // Also remove from cart if it exists there
+    setCart(cart.filter(book => book.id !== bookId));
+  };
+
   if (currentView === "reader" && selectedBook) {
     return <BookReader book={selectedBook} onBack={() => setCurrentView("home")} />;
   }
