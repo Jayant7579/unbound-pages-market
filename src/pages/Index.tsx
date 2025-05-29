@@ -1,14 +1,14 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Search, ShoppingCart, Star, Users, TrendingUp, Heart, LogIn } from "lucide-react";
+import { BookOpen, Search, ShoppingCart, Star, Users, TrendingUp, Heart, LogIn, Shield } from "lucide-react";
 import BookReader from "@/components/BookReader";
 import SellBookForm from "@/components/SellBookForm";
 import CartPage from "@/components/CartPage";
 import AuthPage from "@/components/AuthPage";
+import AdminPage from "@/components/AdminPage";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState("home");
@@ -16,7 +16,7 @@ const Index = () => {
   const [cart, setCart] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const featuredBooks = [
+  const [featuredBooks, setFeaturedBooks] = useState([
     {
       id: 1,
       title: "The Digital Revolution",
@@ -61,7 +61,7 @@ const Index = () => {
       description: "Master the fundamentals of culinary excellence.",
       preview: "Cooking is more than following recipes; it's about understanding ingredients..."
     }
-  ];
+  ]);
 
   const categories = ["All", "Technology", "Self-Help", "Science Fiction", "Cooking", "Business", "Health"];
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -107,6 +107,27 @@ const Index = () => {
     setCurrentView("reader");
   };
 
+  // Admin functions
+  const addBook = (bookData) => {
+    const newBook = {
+      ...bookData,
+      id: Math.max(...featuredBooks.map(b => b.id)) + 1
+    };
+    setFeaturedBooks([...featuredBooks, newBook]);
+  };
+
+  const updateBook = (bookId, bookData) => {
+    setFeaturedBooks(featuredBooks.map(book => 
+      book.id === bookId ? { ...book, ...bookData } : book
+    ));
+  };
+
+  const deleteBook = (bookId) => {
+    setFeaturedBooks(featuredBooks.filter(book => book.id !== bookId));
+    // Also remove from cart if present
+    setCart(cart.filter(book => book.id !== bookId));
+  };
+
   if (currentView === "reader" && selectedBook) {
     return <BookReader book={selectedBook} onBack={() => setCurrentView("home")} />;
   }
@@ -128,6 +149,18 @@ const Index = () => {
 
   if (currentView === "auth") {
     return <AuthPage onBack={() => setCurrentView("home")} />;
+  }
+
+  if (currentView === "admin") {
+    return (
+      <AdminPage 
+        onBack={() => setCurrentView("home")}
+        books={featuredBooks}
+        onAddBook={addBook}
+        onUpdateBook={updateBook}
+        onDeleteBook={deleteBook}
+      />
+    );
   }
 
   return (
@@ -173,6 +206,14 @@ const Index = () => {
               >
                 <LogIn className="h-4 w-4 mr-2" />
                 Login
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setCurrentView("admin")}
+                className="text-gray-700 hover:text-purple-600 border-orange-200 hover:bg-orange-50"
+              >
+                <Shield className="h-4 w-4 mr-2" />
+                Admin
               </Button>
             </nav>
           </div>
